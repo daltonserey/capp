@@ -14,7 +14,11 @@ Este script requer a instalação da extensão
 [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey)
 no Chrome (acho que também funciona no Firefox, mas nunca
 testei). Uma vez instalada a extensão, você deve instalar
-o script deste repositório.
+o script deste repositório. 
+
+> Acho que o Tampermonkey permite instalar o script a partir de
+> uma URL. Se você descobrir como, pode usar este link para a
+> versão mais recente do script.
 
 Infelizmente, não descobri uma forma simples de disponibilizar
 esta extensão. Quando descobrir, atualizo esta informação.
