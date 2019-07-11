@@ -17,8 +17,9 @@ testei). Uma vez instalada a extensão, você deve instalar
 o script deste repositório. 
 
 > Acho que o Tampermonkey permite instalar o script a partir de
-> uma URL. Se você descobrir como, pode usar este link para a
-> versão mais recente do script.
+> uma URL. Se você descobrir como, pode usar [este
+> link](https://raw.githubusercontent.com/daltonserey/capp/master/controle-academico-pp-ufcg.js)
+> para a versão mais recente do script.
 
 Infelizmente, não descobri uma forma simples de disponibilizar
 esta extensão. Quando descobrir, atualizo esta informação.
