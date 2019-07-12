@@ -11,70 +11,97 @@
 
 (function() {
     'use strict';
-
     if (!window.location.href.includes('ProfessorTurmaNotasEditar')) {
-        console.log('não é edição de notas...');
+        console.log('não é página de edição de notas...');
         return;
     };
 
-    // adiciona widgets
-    let $ta = document.createElement('textarea');
+    // localiza tabela de notas
     let $table = document.querySelector('table');
-    $ta.placeholder = 'copie e cole seu CSV aqui (matrícula, nota1, nota2, nota3, final)';
-    $ta.style.width = '100%';
-    $ta.style.height = '10em';
-    $ta.style.fontFamily = 'monospace';
-    $table.parentElement.insertBefore($ta, $table);
 
+    // adiciona textarea do csv
+    let $csv = document.createElement('textarea');
+    $csv.placeholder = 'copie e cole seu CSV aqui (matrícula, nota1, nota2, nota3, final)';
+    $csv.style.width = '100%';
+    $csv.style.height = '10em';
+    $csv.style.fontFamily = 'monospace';
+    $table.parentElement.insertBefore($csv, $table);
+
+    // adiciona button
     let $button = document.createElement('button');
     $button.setAttribute('type', 'button');
     $button.classList.add('btn');
     $button.classList.add('btn-success');
     $button.innerText = 'Copiar para o diário de classe';
-    $button.addEventListener('click', function () {
-        copy();
-    });
+    $button.addEventListener('click', do_it);
     $table.parentElement.insertBefore($button, $table);
 
-    function csv2json(csv) {
+    function copy2table(data) {
+        let $table = document.querySelector('table');
+
+        let lines = $table.querySelectorAll('tr');
+        lines.forEach(($line, i) => {
+            if (i == 0) return; // pula linha de headers
+            let matricula = $line.querySelectorAll('td')[1].innerText;
+            if (!data[matricula]) return; // matricula não encontrada nos dados
+
+            // transcreve notas
+            for (let i=1; i <= numNotas(); i++) {
+                let $input_nota = $line.querySelector(`input[id^=n${i}_`);
+                $input_nota.value = data[matricula][`nota${i}`] ? Number(data[matricula][`nota${i}`]).toFixed(1): '';
+            }
+
+            // transcreve final
+            let $nota_final = $line.querySelector('input[id^=f_');
+            $nota_final.value = data[matricula].final;
+        });
+    };
+
+    function csv2array(csv) {
         let lines = csv.match(/[^\r\n]+/g);
+        if (!lines) return [];
         lines.forEach((line, i) => {
             lines[i] = line.split(",");
         });
         return lines;
     };
 
-    function update(data) {
-        let map = {};
-        data.forEach(o => {
-            let matricula = o[0];
-            let n1 = o[1];
-            let n2 = o[2];
-            let n3 = o[3];
-            let final = o[4];
-            map[matricula] = {n1, n2, n3, final};
-        });
+    function numNotas() {
+        return Number(document.querySelector('#numNotas').value);
+    }
 
-        let $table = document.querySelector('table');
-        let lines = $table.querySelectorAll('tr');
-        lines.forEach(($line, i) => {
-            if (i == 0) return;
-            let matricula = $line.querySelectorAll('td')[1].innerText;
-            if (!map[matricula]) return;
+    function record(line) {
+        let rec = { matricula: line[0] };
+        for (let i=1; i<=numNotas(); i++){
+            rec[`nota${i}`] = line[i] || '';
+        }
 
-            let $n1 = $line.querySelector('input[id^=n1_');
-            let $n2 = $line.querySelector('input[id^=n2_');
-            let $n3 = $line.querySelector('input[id^=n3_');
-            let $final = $line.querySelector('input[id^=f_');
-            $n1.value = map[matricula].n1;
-            $n2.value = map[matricula].n2;
-            $n3.value = map[matricula].n3;
-            $final.value = map[matricula].final;
-        });
+        if (line.length === numNotas() + 2) {
+            rec.final = line[line.length - 1];
+        }
+        else if (line.length > numNotas() + 2) {
+            console.log('Alguns dados da linha serão ignorados');
+            console.log(line);
+            rec.final = "";
+        } else {
+            console.log('Faltam dados na linha');
+            console.log(line);
+            rec.final = "";
+        }
+        return rec;
+    }
+
+    function do_it() {
+        let data = csv2array($csv.value)
+                   .map(line => record(line))
+                   .reduce((mapa, r) => {mapa[r.matricula] = r; return mapa}, {});
+        copy2table(data);
     };
 
-    function copy() {
-        update(csv2json($ta.value));
-    };
+    window.do_it = do_it;
+    window.numNotas = numNotas;
+    window.csv2array = csv2array;
+    window.record = record;
+    window.copy2table = copy2table;
 
 })();
